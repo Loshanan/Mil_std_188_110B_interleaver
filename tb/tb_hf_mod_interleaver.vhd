@@ -1,6 +1,7 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
+use ieee.math_real.all;
 
 use std.textio.all;
 use work.tb_avalon_st_driver_pkg.all;
@@ -8,7 +9,10 @@ use work.tb_avalon_st_driver_pkg.all;
 entity tb_hf_mod_interleaver is
     generic (
         g_bit_rate    : natural := 150;
-        g_intl_mode   : string  := "short"
+        g_intl_mode   : string  := "short";
+        g_idle_clks   : integer := 2000;
+        g_rnd_ready   : boolean := false;
+        g_rnd_valid   : boolean := false
     );
 end tb_hf_mod_interleaver;
 
@@ -128,7 +132,62 @@ begin
         wait;
     end process P_ST_MONITOR;
 
+    p_rnd_ready : process
+        variable seed1        : positive  := 844;
+        variable seed2        : positive  := 429;
+        variable rand         : real;
+        variable rand_int     : integer;
+    begin
+        r_ready     <= '0';
+        wait until r_rstn = '1';
+        wait for 25 * c_clk_period;
 
+        if g_rnd_ready then
+            loop 
+                uniform(seed1, seed2, rand);
+                rand_int    := integer(6.0 * rand);
+                for i in 0 to rand_int loop
+                    wait until rising_edge(r_clk);
+                end loop;
+                r_ready     <= '1';
+
+                uniform(seed1, seed2, rand);
+                rand_int    := integer(6.0 * rand);
+                for i in 0 to rand_int loop
+                    wait until rising_edge(r_clk);
+                end loop;
+                r_ready     <= '0';
+            end loop;
+        end if;
+
+        r_ready   <= '1';
+        wait;
+    end process p_rnd_ready ;
+    
+    p_sim_timeout : process(r_clk)
+        variable cap_count      : integer   := 0;
+        variable waiting_clk    : integer   := 0;
+        variable start_waiting  : boolean   := false;
+    begin
+        
+        if rising_edge(r_clk) then
+            if not start_waiting then
+                if r_ready = '1' and w_valid = '1' then
+                    start_waiting := true;
+                    cap_count     := 1;
+                end if;
+            else
+                waiting_clk     := waiting_clk + 1;
+                if r_ready = '1' and w_valid = '1' then
+                    cap_count   := cap_count + 1;
+                    waiting_clk := 0;
+                end if;
+                if waiting_clk > g_idle_clks then
+                    assert false report "END of Simulation !! output idles out..." severity failure;
+                end if;
+            end if;
+        end if;
+    end process p_sim_timeout;
 
     hf_mod_interleaver_inst : hf_mod_interleaver
     PORT MAP (
