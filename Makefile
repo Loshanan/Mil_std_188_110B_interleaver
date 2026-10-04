@@ -1,0 +1,38 @@
+GHDL		:= ghdl
+GTKWAVE	:= gtkwave
+
+BR				?= 150
+INTL			?= short
+GENERICS  := -gg_bit_rate=$(BR) -gg_intl_mode=$(INTL)
+
+SIM_TIME	?= 30us
+WORK_DIR	:= work_dir
+SRC_DIR		:= src/rtl
+TB_DIR		:= tb
+LOG_DIR		:= $(TB_DIR)/sim_logs
+
+TOP 			:= tb_hf_mod_interleaver
+
+RTL				:= $(SRC_DIR)/hf_mod_interleaver.vhd
+TB				:= $(TB_DIR)/tb_avalon_st_driver_pkg.vhd \
+						 $(TB_DIR)/tb_hf_mod_interleaver.vhd
+						 
+
+WAVE			:= $(LOG_DIR)/wave.ghw
+WAVE_CFG	:= $(LOG_DIR)/wave_config.gtkw
+
+.PHONY: all sim wave clean
+
+all : sim
+
+sim: 
+		mkdir -p $(WORK_DIR)
+		$(GHDL) -a --workdir=$(WORK_DIR) $(RTL) $(TB)
+		$(GHDL) -e --workdir=$(WORK_DIR) $(TOP)
+		$(GHDL) -r --workdir=$(WORK_DIR) $(TOP) $(GENERICS) --wave=$(WAVE) --stop-time=$(SIM_TIME)
+
+wave:
+		$(GTKWAVE) $(WAVE) $(WAVE_CFG)
+
+clean:
+		rm -rf $(WORK_DIR) $(WAVE)
