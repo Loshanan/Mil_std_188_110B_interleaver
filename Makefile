@@ -6,7 +6,8 @@ IDLE_CLKS	?= 2000
 
 BR				?= 150
 INTL			?= short
-GENERICS  := -gg_bit_rate=$(BR) -gg_intl_mode=$(INTL) -gg_idle_clks=$(IDLE_CLKS)
+RAND_READY?= false
+GENERICS  := -gg_bit_rate=$(BR) -gg_intl_mode=$(INTL) -gg_idle_clks=$(IDLE_CLKS) -gg_rnd_ready=$(RAND_READY)
 
 WORK_DIR	:= work_dir
 SRC_DIR		:= src/rtl

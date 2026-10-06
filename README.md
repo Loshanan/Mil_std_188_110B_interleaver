@@ -121,5 +121,6 @@ Started project on 03/Sep/2026
 02/Oct/2026 - single frame passing, debugging multi frames (~1.5 hour) 
 03/Oct/2026 - Multi frame passing, debugging long interleaver mode (~3 hour)
 04/Oct/2026 - Finished debugging, git init, more to test (~2 hour)
-
+05/Oct/2026 - Started debugging system with back pressure (~1.5 hour)
+06/Oct/2026 - Fixed error in back pressure (~1.5 hour)
 -->

@@ -386,52 +386,53 @@ begin
                     r_read_pnter_s0 <= r_read_pnter_s0 + 1;
                 end if;
 
-            else
-                r_read_sop_s0   <= '0';
-                r_read_eop_s0   <= '0';
-                r_read_valid_s0 <= '0';
+--            else
+--                r_read_sop_s0   <= '0';
+--                r_read_eop_s0   <= '0';
+--                r_read_valid_s0 <= '0';
             end if;
-
-            ---------------------------------------------------------------
-            -- Stage 1
-            ---------------------------------------------------------------
-            r_read_row_s1   <= r_read_row_s0;
-            r_read_col_s1   <= resize(40 * r_read_col_s0, 14);
-            r_read_valid_s1 <= r_read_valid_s0;
-            r_read_sop_s1   <= r_read_sop_s0;
-            r_read_eop_s1   <= r_read_eop_s0;
-            r_read_pnter_s1 <= r_read_pnter_s0;
-
-            ---------------------------------------------------------------
-            -- Stage 2
-            ---------------------------------------------------------------
-            r_read_addr_s2  <= resize(r_read_row_s1 + r_read_col_s1, 14);
-            r_read_valid_s2 <= r_read_valid_s1;
-            r_read_sop_s2   <= r_read_sop_s1;
-            r_read_eop_s2   <= r_read_eop_s1;
-            r_read_pnter_s2 <= r_read_pnter_s1;
-
-            ---------------------------------------------------------------
-            -- Stage 3
-            ---------------------------------------------------------------
-            r_read_valid_s3 <= r_read_valid_s2;
-            r_read_sop_s3   <= r_read_sop_s2;
-            r_read_eop_s3   <= r_read_eop_s2;
-            r_read_pnter_s3 <= r_read_pnter_s2;
+            
+            if m_ready = '1' then
+                ---------------------------------------------------------------
+                -- Stage 1
+                ---------------------------------------------------------------
+                r_read_row_s1   <= r_read_row_s0;
+                r_read_col_s1   <= resize(40 * r_read_col_s0, 14);
+                r_read_valid_s1 <= r_read_valid_s0;
+                r_read_sop_s1   <= r_read_sop_s0;
+                r_read_eop_s1   <= r_read_eop_s0;
+                r_read_pnter_s1 <= r_read_pnter_s0;
     
-            ---------------------------------------------------------------
-            -- Stage 4 (Output Stage)
-            ---------------------------------------------------------------
-            r_m_read_valid  <= r_read_valid_s3;
-            r_m_read_sop    <= r_read_sop_s3;
-            r_m_read_eop    <= r_read_eop_s3;
-            r_read_pnter_s4 <= r_read_pnter_s3;
-            if (r_read_pnter_s3(0) = '0') then
-                r_m_read_data   <= w_rdata_mem1;
-            elsif (r_read_pnter_s3(0) = '1') then
-                r_m_read_data   <= w_rdata_mem2;
+                ---------------------------------------------------------------
+                -- Stage 2
+                ---------------------------------------------------------------
+                r_read_addr_s2  <= resize(r_read_row_s1 + r_read_col_s1, 14);
+                r_read_valid_s2 <= r_read_valid_s1;
+                r_read_sop_s2   <= r_read_sop_s1;
+                r_read_eop_s2   <= r_read_eop_s1;
+                r_read_pnter_s2 <= r_read_pnter_s1;
+    
+                ---------------------------------------------------------------
+                -- Stage 3
+                ---------------------------------------------------------------
+                r_read_valid_s3 <= r_read_valid_s2;
+                r_read_sop_s3   <= r_read_sop_s2;
+                r_read_eop_s3   <= r_read_eop_s2;
+                r_read_pnter_s3 <= r_read_pnter_s2;
+        
+                ---------------------------------------------------------------
+                -- Stage 4 (Output Stage)
+                ---------------------------------------------------------------
+                r_m_read_valid  <= r_read_valid_s3;
+                r_m_read_sop    <= r_read_sop_s3;
+                r_m_read_eop    <= r_read_eop_s3;
+                r_read_pnter_s4 <= r_read_pnter_s3;
+                if (r_read_pnter_s3(0) = '0') then
+                    r_m_read_data   <= w_rdata_mem1;
+                elsif (r_read_pnter_s3(0) = '1') then
+                    r_m_read_data   <= w_rdata_mem2;
+                end if;
             end if;
-
         end if;
     end process;
 
@@ -447,8 +448,10 @@ begin
                 end if;
             end if;
             -- read
-            r_raddr_mem1    <= r_read_addr_s2;
-            r_raddr_mem2    <= r_read_addr_s2;
+            if m_ready = '1' then
+                r_raddr_mem1    <= r_read_addr_s2;
+                r_raddr_mem2    <= r_read_addr_s2;
+            end if;
         end if;
     end process;
 
@@ -485,14 +488,17 @@ begin
                        else '0';
     w_last_f_long   <= '1' when (r_cfg_intl_mode = '1' and r_sr_wf_count(23) = '1') else '0';
 
-    w_last_18_col   <= '1' when (r_cfg_bit_rate = "00" and r_cfg_intl_mode = '0') else '0';
+    w_last_18_col   <= '1' when (r_cfg_bit_rate /= "11" and r_cfg_intl_mode = '0') else '0';
+    --w_last_18_col   <= '1';
 
     w_last_36_col   <= '1' when ((r_cfg_bit_rate = "11" and r_cfg_intl_mode = '0')
                             and (r_sr_16_count(1) = '1'))
                         else '0';
 
-    w_last_144_col  <= '1' when (((r_cfg_intl_mode = '1') and (r_cfg_bit_rate = "00" or r_cfg_bit_rate = "01" or r_cfg_bit_rate = "10"))
-                            and (r_sr_16_count(7) = '1'))
+    w_last_144_col  <= '1' when (
+                              ((r_cfg_intl_mode = '1') and (r_cfg_bit_rate /= "11"))
+                                  and (r_sr_16_count(7) = '1')
+                          )
                           else '0';
 
     w_last_288_col  <= '1' when (r_cfg_bit_rate = "11" and r_cfg_intl_mode = '1' and r_sr_16_count(15) = '1') 
