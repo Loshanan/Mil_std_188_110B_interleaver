@@ -123,4 +123,25 @@ Started project on 03/Sep/2026
 04/Oct/2026 - Finished debugging, git init, more to test (~2 hour)
 05/Oct/2026 - Started debugging system with back pressure (~1.5 hour)
 06/Oct/2026 - Fixed error in back pressure (~1.5 hour)
+07/Oct/2026 - Trying to add file comparison in vhdl tb itself (~2 hour)
+              (Bug - while reading ref file readline reads only one char; happens in the middle of the run)
+08/Oct/2026 - Fixed realine bug - problem: trying to compare without closing the logging file then opening the same log file in read mode for comparison
+              Added random valid - needs further testing like regression
+              (~2 hour)
+08/Oct/2026 - all regressions generated - working fine (need to check the idle out clock period)
+              (~1.5 hour)
+09/Oct/2026 - all simulation done; regression is passing for all (~1 hour)
+-->
+
+<!--
+TODO:
+DONE-------------------------------------------- *) end simulation
+DONE-------------------------------------------- *) tb output comparison
+DONE-------------------------------------------- *) toggle input valid
+DONE-------------------------------------------- *) Simulate all at once (like regression)
+DONE-------------------------------------------- *) Generate all test vectors with defined seed
+
+*) Synth, Route
+*) Documentation and finish
+*) push and CV update
 -->

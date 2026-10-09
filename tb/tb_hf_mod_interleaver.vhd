@@ -11,8 +11,8 @@ entity tb_hf_mod_interleaver is
         g_bit_rate    : natural := 150;
         g_intl_mode   : string  := "short";
         g_idle_clks   : integer := 2000;
-        g_rnd_ready   : boolean := false;
-        g_rnd_valid   : boolean := false
+        g_rand_ready  : boolean := false;
+        g_rand_valid  : boolean := false
     );
 end tb_hf_mod_interleaver;
 
@@ -59,6 +59,9 @@ architecture sim of tb_hf_mod_interleaver is
     SIGNAL w_eop      : std_logic;
     SIGNAL r_config   : std_logic_vector(2 downto 0) := "000";
 
+    signal sim_done   : boolean   := false;
+    signal write_done : boolean   := false;
+
     function f_gen_config(bit_rate : integer; intl_mode : string)
     return std_logic_vector is
         variable v_bit_rate   : std_logic_vector(1 downto 0);
@@ -91,7 +94,7 @@ architecture sim of tb_hf_mod_interleaver is
 
 begin
 
-    r_clk <= not r_clk after c_clk_period / 2;
+    r_clk <= not r_clk after c_clk_period / 2 when not write_done else '0';
 
     r_config    <= f_gen_config(g_bit_rate, g_intl_mode);
 
@@ -104,6 +107,7 @@ begin
         wait for c_clk_period * 20;
         
         drive_avln_st(stim_file,
+                      g_rand_valid,
                       r_clk, 
                       c_clk_period,
                       w_ready,
@@ -121,6 +125,8 @@ begin
         monitor_avln_st(
                     ref_file,
                     log_file,
+                    sim_done,
+                    write_done,
                     r_clk,
                     c_clk_period,
                     r_ready,
@@ -130,6 +136,7 @@ begin
                     w_eop
         );
         wait;
+
     end process P_ST_MONITOR;
 
     p_rnd_ready : process
@@ -142,18 +149,18 @@ begin
         wait until r_rstn = '1';
         wait for 25 * c_clk_period;
 
-        if g_rnd_ready then
+        if g_rand_ready then
             loop 
                 uniform(seed1, seed2, rand);
-                rand_int    := integer(6.0 * rand);
+                rand_int    := integer(10.0 * rand);
                 for i in 0 to rand_int loop
                     wait until rising_edge(r_clk);
                 end loop;
                 r_ready     <= '1';
 
                 uniform(seed1, seed2, rand);
-                rand_int    := integer(6.0 * rand);
-                for i in 0 to rand_int loop
+                rand_int    := integer(10.0 * rand);
+                for i in 1 to rand_int loop       -- 1 to rand range includes no delay as well
                     wait until rising_edge(r_clk);
                 end loop;
                 r_ready     <= '0';
@@ -183,11 +190,25 @@ begin
                     waiting_clk := 0;
                 end if;
                 if waiting_clk > g_idle_clks then
-                    assert false report "END of Simulation !! output idles out..." severity failure;
+                    sim_done    <= true;
+                    --report "Simulation Done!! ";
+                    ---wait;
+                    --assert false report "END of Simulation !! output idles out..." severity failure;
                 end if;
             end if;
         end if;
     end process p_sim_timeout;
+
+    p_compare_log: process
+    begin
+        ---wait until sim_done;
+        wait until write_done = true;
+        wait for 10 us;      -- let the logging finish
+        compare_log_files(log_file, ref_file);
+        --report "comparision done";
+        wait;
+
+    end process p_compare_log;
 
     hf_mod_interleaver_inst : hf_mod_interleaver
     PORT MAP (

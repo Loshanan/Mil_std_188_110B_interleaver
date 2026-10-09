@@ -5,6 +5,9 @@ from read_addr import gen_read_order
 from write_addr import gen_write_order 
 import os
 
+bit_rates = [0, 1, 2, 3]        # 150, 300, 600, 1200
+intl_modes = [0, 1]
+
 def take_input():
     # bit rate
     rate_setting = input("Bit rate setting selection: \n 0: 150 bps (default), \n 1: 300bps, \n 2: 600bps, \n 3: 1200bps \nEnter the value: ")
@@ -32,7 +35,7 @@ def take_input():
     return bit_rate, intl_len, intl_frame_count
 
 
-def main(bit_rate, intl_len, intl_frame_count, const_tv):
+def main(bit_rate, intl_len, intl_frame_count, rand_seed):
         
     # parameter generation
     max_col = 18
@@ -49,17 +52,16 @@ def main(bit_rate, intl_len, intl_frame_count, const_tv):
     fec_frame_len = 40 * max_col // no_of_frames       # size of the input frame (output of fec)
                                                         # output frame size is X3 of input for short interleaver and 
                                                         #                      X24         for long  interlever
-    # INPUT FRAME GENERATION
-    seed = 12345
-    rng = np.random.default_rng()
 
     input_frames = []       # each frame in this array will fit into the interleaver based on its config
     for fcount in range(intl_frame_count):
+        seed = rand_seed + fcount        # assigning different seeds for each intl frames
+        rng = np.random.default_rng(seed)
         frame_in = np.zeros((40 * max_col, 3), dtype=int)
 
         # data bits
         tx_bits = rng.integers(0, 2, 40 * max_col)
-        frame_in[:, 0]  = 1 if const_tv else tx_bits
+        frame_in[:, 0]  = tx_bits
 
         # sop
         frame_in[::fec_frame_len, 1]  = 1
@@ -97,14 +99,24 @@ def save_to_file(bit_rate, intl_len, input_frames, output_frames):
 
     combined_in = np.vstack(input_frames)
     in_TV = pd.DataFrame(combined_in, columns=["data", "sop", "eop"])
-    os.makedirs(f"sim_stim/{intl}_{rate}", exist_ok=True)
-    in_TV.to_csv(f"sim_stim/{intl}_{rate}/in_{intl}_{rate}.csv", index=False)
+    os.makedirs(f"../sim_stim/{intl}_{rate}", exist_ok=True)
+    in_TV.to_csv(f"../sim_stim/{intl}_{rate}/in_{intl}_{rate}.csv", index=False)
 
     combined_out = np.vstack(output_frames)
     out_TV = pd.DataFrame(combined_out, columns=["data", "sop", "eop"])
-    out_TV.to_csv(f"sim_stim/{intl}_{rate}/out_{intl}_{rate}.csv", index=False)
+    out_TV.to_csv(f"../sim_stim/{intl}_{rate}/out_{intl}_{rate}.csv", index=False)
 
 if __name__ == "__main__":
-    bit_rate, intl_len, no_of_intl_frames = take_input()
-    input_frames, output_frames = main(bit_rate, intl_len, no_of_intl_frames, False)
-    save_to_file(bit_rate, intl_len, input_frames, output_frames)
+    #bit_rate, intl_len, no_of_intl_frames = take_input()
+    rand_seed = int(input("Enter the seed for random generation: "))
+    no_frames = int(input("Enter the number of interleaver frames to generate: "))
+
+    for br in bit_rates:
+        for intl in intl_modes:
+            input_frames, output_frames = main(br, intl, no_frames, rand_seed)
+            save_to_file(br, intl, input_frames, output_frames)
+
+    with open("seed", "w") as file:
+        file.write("Seed used for the first interleaver frame: ")
+        file.write(str(rand_seed))
+
