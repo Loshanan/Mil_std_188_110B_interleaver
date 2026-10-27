@@ -1,8 +1,7 @@
-# MIL\_STD\_188\_110B HF modem
+**Note:** This project is under active development and expected to be completed by **November 01, 2026**
+# MIL\_STD\_188\_110B HF modem Interleaver Design in VHDL
 
-## Interleaver Design in VHDL
-
-## Board ZCU102 - TBD
+Board: Gowin Tang Nano 9k
 
 ## Motivation
 
@@ -57,6 +56,9 @@ Interleaver block based on the configureation is following.
 
 Note: 300 and 150 bit rates get the same block size as 600 since they use repeated coding. 300 has 1/4 coding rate and 150 has 1/8 coding rate while 600 (and 1200) has 1/2 coding rate.
 
+## Architecture 
+![Architecture of Interleaver](./arc_interleaver.jpg)
+
 ## loading algorithm
 
 --TODO: explain algo
@@ -96,6 +98,20 @@ TODO: to be validated
 ## Verification procedure
 
 
+## Board simulation
+
+Using open source tool chain
+
+* Simulation    : ghdl + gtkwave
+* Synthesize    : yosys 
+* Place and Route   : NextPnR
+* Bitstream generation : Apicula
+* Programming the board : openFPGALoader
+
+## References
+
+* [MIL-STD-188-110B baseband link level MatLab model](https://www.mathworks.com/help/comm/ug/defense-communications-us-mil-std-188-110b-baseband-link-level.html)
+* [Lushay Labs - Tang Nano 9k series](https://www.mathworks.com/help/comm/ug/defense-communications-us-mil-std-188-110b-baseband-link-level.html)
 
 <!-- 
 
@@ -131,6 +147,17 @@ Started project on 03/Sep/2026
 08/Oct/2026 - all regressions generated - working fine (need to check the idle out clock period)
               (~1.5 hour)
 09/Oct/2026 - all simulation done; regression is passing for all (~1 hour)
+13/Oct/2026 - tried to install ghdl-yosys-plugin: failed (~1 hour)
+              (Decided to run the design in tang nano 9k; First thing is to familiarize with the board)
+14/Oct/2026 - Getting familiarize with this Tang Nano 9k board (~1 hour)
+15/Oct/2026 - Getting familiarize with open source tool chain (~1 hour)
+16/Oct/2026 - Loaded first LED lighting bitstream to fpga - fpga working well (~1.5 hour)
+17/Oct/2026 - Getting familarize with fpga
+18/Oct/2026 - Getting familarize with fpga
+19/Oct/2026 - Started uart module (~1.5 hour)
+21/Oct/2026 - Playing with fpga uart (~1 hour)
+22/Oct/2026 - Done uart rx module and working in board (~1 hour)
+23/Oct/2026 - wrote uart tx module (~ 1.5 hour)
 -->
 
 <!--
