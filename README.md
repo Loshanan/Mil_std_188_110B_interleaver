@@ -57,7 +57,7 @@ Interleaver block based on the configureation is following.
 Note: 300 and 150 bit rates get the same block size as 600 since they use repeated coding. 300 has 1/4 coding rate and 150 has 1/8 coding rate while 600 (and 1200) has 1/2 coding rate.
 
 ## Architecture 
-![Architecture of Interleaver](./arc_interleaver.jpg)
+![Architecture of Interleaver](./docs/arc_interleaver.jpg)
 
 ## loading algorithm
 
@@ -158,6 +158,12 @@ Started project on 03/Sep/2026
 21/Oct/2026 - Playing with fpga uart (~1 hour)
 22/Oct/2026 - Done uart rx module and working in board (~1 hour)
 23/Oct/2026 - wrote uart tx module (~ 1.5 hour)
+26/Oct/2026 - working on developing fifo for board setup (~1.5 hour)
+28/Oct/2026 - working on developing fifo for board setup (~1.5 hour)
+29/Oct/2026 - finished fifo simulation (~1.5 hour)
+03/Nov/2026 - uart avlnst bridge skeleton (~1.5 hour) : focus only 5% : PLEASE TRIAIN YOUR MIND TO FOCUS : this current approach is so inneffective.
+04/Nov/2026 - uart bridge receiving uart adn converting to avlnst - next need to verify bit to bit (~1.5 hour)
+05/Nov/2026 - avalon stream to uart developed - need testing (~1 hour) - not enough focus
 -->
 
 <!--
@@ -167,7 +173,11 @@ DONE-------------------------------------------- *) tb output comparison
 DONE-------------------------------------------- *) toggle input valid
 DONE-------------------------------------------- *) Simulate all at once (like regression)
 DONE-------------------------------------------- *) Generate all test vectors with defined seed
-
+DONE-------------------------------------------- *) Stress test on fifo
+*) uart bridge in test
+*) uart bridge out test
+1) add pass count to regression
+2) board setup
 *) Synth, Route
 *) Documentation and finish
 *) push and CV update

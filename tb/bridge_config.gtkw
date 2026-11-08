@@ -1,0 +1,85 @@
+[*]
+[*] GTKWave Analyzer v3.3.126 (w)1999-2026 BSI
+[*] Sun Nov  8 05:09:55 2026
+[*]
+[dumpfile] "/mnt/work/projects/hf_mod_interleaver/tb/sim_logs/bridge.ghw"
+[dumpfile_mtime] "Sat Nov  7 16:30:36 2026"
+[dumpfile_size] 5453212
+[savefile] "/mnt/work/projects/hf_mod_interleaver/tb/bridge_config.gtkw"
+[timestart] 0
+[size] 1366 684
+[pos] -1 -1
+*-38.841854 36000000000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] top.
+[treeopen] top.tb_uart_avlnst_bridge.
+[treeopen] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.
+[sst_width] 209
+[signals_width] 166
+[sst_expanded] 1
+[sst_vpaned_height] 186
+@200
+-System
+@28
+top.tb_uart_avlnst_bridge.r_clk
+top.tb_uart_avlnst_bridge.r_rstn
+@420
+top.tb_uart_avlnst_bridge.sim_done
+@200
+-
+-RX
+@28
+top.tb_uart_avlnst_bridge.r_uart_rx
+top.tb_uart_avlnst_bridge.r_m_ready
+top.tb_uart_avlnst_bridge.w_m_valid
+top.tb_uart_avlnst_bridge.w_m_data
+top.tb_uart_avlnst_bridge.w_m_sop
+top.tb_uart_avlnst_bridge.w_m_eop
+@200
+-TX
+@28
+top.tb_uart_avlnst_bridge.w_uart_tx
+top.tb_uart_avlnst_bridge.w_s_ready
+top.tb_uart_avlnst_bridge.r_s_valid
+top.tb_uart_avlnst_bridge.r_s_data
+top.tb_uart_avlnst_bridge.r_s_sop
+@29
+top.tb_uart_avlnst_bridge.r_s_eop
+@200
+-
+-Debug RX
+@28
+top.tb_uart_avlnst_bridge.r_uart_rx
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.i_uart_rx
+@22
+#{top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[7:0]} top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[7] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[6] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[5] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[4] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[3] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[2] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[1] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[0]
+@28
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_dval
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.fifo_sync_tx_inst.i_write_en
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.fifo_sync_tx_inst.o_empty
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.fifo_sync_tx_inst.i_read_en
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.fifo_sync_tx_inst.o_full
+@200
+-
+-Debug TX
+@28
+top.tb_uart_avlnst_bridge.r_clk
+@200
+-avlnST
+@28
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.s_data
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.s_ready
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.s_valid
+@200
+-SR
+@28
+#{top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[7:0]} top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[7] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[6] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[5] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[4] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[3] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[2] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[1] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_data[0]
+#{top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[7:0]} top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[7] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[6] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[5] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[4] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[3] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[2] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[1] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.r_tx_sr_val[0]
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.fifo_sync_tx_inst.r_full
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_tx_ready
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.fifo_sync_tx_inst.i_write_en
+#{top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[7:0]} top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[7] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[6] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[5] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[4] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[3] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[2] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[1] top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_rx_data[0]
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.i_tx_dval
+top.tb_uart_avlnst_bridge.w_uart_tx
+top.tb_uart_avlnst_bridge.uart_avlnst_bridge_inst.uart_trx_inst.o_uart_tx
+[pattern_trace] 1
+[pattern_trace] 0
