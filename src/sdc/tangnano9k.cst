@@ -1,0 +1,13 @@
+IO_LOC "i_clk" 52;
+IO_PORT "clk" PULL_MODE=UP;
+IO_LOC "i_rstn" 3;
+
+IO_LOC "i_uart_rx" 18;
+IO_LOC "o_uart_tx" 17;
+
+IO_LOC "err_stat[0]" 10;
+IO_LOC "err_stat[1]" 11;
+IO_LOC "err_stat[2]" 13;
+IO_LOC "err_stat[3]" 14;
+IO_LOC "err_stat[4]" 15;
+IO_LOC "err_stat[5]" 16;

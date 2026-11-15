@@ -50,8 +50,8 @@ architecture arc_fifo_sync of fifo_sync is
     --signal r_read_data  : std_logic_vector(g_WIDTH-1 downto 0)  := (others => '0');
     signal r_full       : std_logic             := '0';
     signal r_afull      : std_logic             := '0';
-    signal r_empty      : std_logic             := '0';
-    signal r_aempty     : std_logic             := '0';
+    signal r_empty      : std_logic             := '1';
+    signal r_aempty     : std_logic             := '1';
 
     signal w_read_data  : std_logic_vector(g_WIDTH-1 downto 0)  := (others => '0');
 

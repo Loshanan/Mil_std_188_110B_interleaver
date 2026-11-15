@@ -66,7 +66,7 @@ architecture arc_uart_trx of uart_trx is
     signal r_rx_data    : std_logic_vector(7 downto 0)  := (others => '0');
     signal r_rx_valid   : std_logic                     := '0';
 
-    signal r_tx_bit     : std_logic                     := '0';
+    signal r_tx_bit     : std_logic                     := '1';
     signal r_tx_data    : std_logic_vector(7 downto 0)  := (others => '0');
     --signal r_tx_bytes   : t_data_bytes(0 to c_message'length - 1)          := f_str_to_msg(c_message);
     signal r_tx_counter : unsigned(c_CLK_CNT_WIDTH-1 downto 0) := (others => '0');
@@ -86,7 +86,7 @@ begin
                 r_rx_bit        <= '1';
                 r_rx_counter    <= (others => '0');
                 r_rx_bit_idx    <= (others => '0');
-                r_rx_data       <= (others => '1');
+                r_rx_data       <= (others => '0');
                 --r_rx_dval       <= '0';
                 r_tx_state      <= S_IDLE;
                 r_tx_bit        <= '1';

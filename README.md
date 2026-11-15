@@ -108,6 +108,39 @@ Using open source tool chain
 * Bitstream generation : Apicula
 * Programming the board : openFPGALoader
 
+## First board Simulation is done on 11/11/2026 - Failed due to not enough memory resources
+
+* Things working fine 
+    - RAM recognized in intl and fifo at synth state
+
+* BUG: PNR failed due to not enough memory resources
+    - memory mapped to SSRAM instead of BSRAM
+    - SSRAM is similar to LUTRAM in xilinx
+    - SSRAM: 16 X 4
+    - one interleaver memory has 40 X 288 (=11520) bits
+    - SSRAM cannot configured to 1 bit width 
+    - so one intl matrix needs 11520/16 = 720 SSRAMs
+    - Also there are 2 fifo each 8 X 8 
+    - Single fifo needs 2 SSRAM (parallel concatanation)
+    - In total 1444 SSRAM inferred where only 270 exists
+
+* Update:
+    - Successfull inferred BRAM after updating synchronous read mode from asynchronous
+
+* Other things to update this iteration
+    - fsm state registered not detected as fsm registers since presence of initial values.
+
+* Lessons
+    - Blidly addin the flowin make doesn't help, do an interactive synthesize/pnr then add the flow to make; otherwise can't get to know what is happening inside.
+
+## Error signals from top
+
+* err_stat(5 downto 0):
+    - `err_stat(0)`   : input fifo full (not handling back pressure so whenever fifo is full this err stat goes high)
+    - `err_stat(1)`   : error in sob position
+    - `err_stat(2)`   : error in eob position
+    - `err_stat(5 downto 3)`  : reserved
+
 ## References
 
 * [MIL-STD-188-110B baseband link level MatLab model](https://www.mathworks.com/help/comm/ug/defense-communications-us-mil-std-188-110b-baseband-link-level.html)
@@ -164,6 +197,10 @@ Started project on 03/Sep/2026
 03/Nov/2026 - uart avlnst bridge skeleton (~1.5 hour) : focus only 5% : PLEASE TRIAIN YOUR MIND TO FOCUS : this current approach is so inneffective.
 04/Nov/2026 - uart bridge receiving uart adn converting to avlnst - next need to verify bit to bit (~1.5 hour)
 05/Nov/2026 - avalon stream to uart developed - need testing (~1 hour) - not enough focus
+10/Nov/2026 - top moduel synthesized; todo python test to board
+11/Nov/2026 - created python test; Not enough resources in board to run full setup :-((   (~1.5 hour)
+12/Nov/2026 - ran test on board, output length is 1/3 of input; need debug (see first board simulation results for last days bug) (~1.5 hour)
+13/Nov/2026 - trying to debug design in board; everytime it runs it gives different values; (Interleaver was in half filled state-> so each run different results; reset before every run) (spent around 2 hours to find this reset thing)
 -->
 
 <!--
@@ -174,11 +211,12 @@ DONE-------------------------------------------- *) toggle input valid
 DONE-------------------------------------------- *) Simulate all at once (like regression)
 DONE-------------------------------------------- *) Generate all test vectors with defined seed
 DONE-------------------------------------------- *) Stress test on fifo
-*) uart bridge in test
-*) uart bridge out test
+DONE-------------------------------------------- *) uart bridge in test
+DONE-------------------------------------------- *) uart bridge out test
 1) add pass count to regression
-2) board setup
-*) Synth, Route
+DONE-------------------------------------------- *) board setup
+DONE-------------------------------------------- *) Synth, Route
+*) python test to run on board
 *) Documentation and finish
 *) push and CV update
 -->

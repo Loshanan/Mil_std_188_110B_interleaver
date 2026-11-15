@@ -24,7 +24,9 @@ entity uart_avlnst_bridge is
         s_valid     : in  std_logic;
         s_data      : in  std_logic;
         s_sop       : in  std_logic;
-        s_eop       : in  std_logic
+        s_eop       : in  std_logic;
+
+        err_stat    : out std_logic_vector(5 downto 0)
 
     );
 end uart_avlnst_bridge;
@@ -38,9 +40,9 @@ architecture arc_uart_avlnst_bridge of uart_avlnst_bridge is
     constant c_BIT_PERIOD   : natural := g_BIT_PERIOD;
     -- fifo constants
     constant c_WIDTH        : natural := 8;
-    constant c_ADDR_WIDTH   : natural := 5;
-    constant c_AE_LEVEL     : natural := 8;
-    constant c_AF_LEVEL     : natural := 24;
+    constant c_ADDR_WIDTH   : natural := 3;
+    constant c_AE_LEVEL     : natural := 2;
+    constant c_AF_LEVEL     : natural := 6;
     -- total bye count
     constant c_BYTE_CNT     : natural := 90; -- 90 for 150bps short intl setting
 
@@ -70,6 +72,15 @@ architecture arc_uart_avlnst_bridge of uart_avlnst_bridge is
     signal w_tx_fifo_empty  : std_logic;
     signal w_tx_fifo_q      : std_logic_vector(7 downto 0);
     signal w_tx_fifo_rden   : std_logic;
+
+    signal r_tx_bit_cnt     : unsigned(2 downto 0)          := (others => '0');
+    signal r_tx_byte_cnt    : unsigned(10 downto 00)        := (others => '0');
+
+    -- error signals
+    signal r_rx_fifo_full   : std_logic := '0';
+    signal w_rx_fifo_full   : std_logic;
+    signal r_tx_sob_pos_err : std_logic := '0';
+    signal r_tx_eob_pos_err : std_logic := '0';
 
     -------------------------------------------------
     -- component declaration 
@@ -128,7 +139,19 @@ begin
                 r_rx_sr_sop     <= (others => '0');
                 r_rx_sr_eop     <= (others => '0');
                 r_rx_byte_cnt   <= (others => '0');
+                r_rx_fifo_full  <= '0';
+                r_tx_sob_pos_err    <= '0';
+                r_tx_eob_pos_err    <= '0';
+
+                r_tx_byte_cnt   <= (others => '0');
+                r_tx_bit_cnt    <= (others => '0');
             else
+                -------------- ERROR STATUS --------------------
+                if (w_rx_fifo_full = '1') then
+                    r_rx_fifo_full  <= '1';
+                end if;
+                
+
                 -- from uart to avalon stream
                 if (w_rx_fifo_rden = '1') then
                     r_rx_fifo_q     <= w_rx_fifo_q;
@@ -146,7 +169,7 @@ begin
                         r_rx_sr_sop     <= (others => '0');
                     end if;
                     -- eop array
-                    if (r_rx_byte_cnt = to_unsigned(c_BYTE_CNT-1, 11)) then
+                    if (r_rx_byte_cnt = c_BYTE_CNT-1) then
                         r_rx_sr_eop     <= (7 => '1', others => '0');
                     else
                         r_rx_sr_eop     <= (others => '0');
@@ -163,10 +186,23 @@ begin
                 -- from avalon stream to uart
                 if (r_tx_sr_val(7) = '1') then
                     r_tx_sr_val     <= (others => '0');
+                    if (r_tx_byte_cnt = c_BYTE_CNT-1) then 
+                        r_tx_byte_cnt   <= (others => '0');
+                    else
+                        r_tx_byte_cnt   <= r_tx_byte_cnt + 1;
+                    end if;
                 else
                     if ((s_valid and (not r_tx_sr_val(7)) and (not w_tx_fifo_afull)) = '1') then
-                        r_tx_sr_data    <= r_tx_sr_data(6 downto 0) & s_data;
+                        r_tx_sr_data    <= s_data & r_tx_sr_data(7 downto 1);
                         r_tx_sr_val     <= r_tx_sr_val(6 downto 0) & '1';
+                        r_tx_bit_cnt    <= r_tx_bit_cnt + 1;
+                        if (r_tx_byte_cnt = c_BYTE_CNT-1 and r_tx_bit_cnt = 7 and s_eop = '0') then
+                            r_tx_eob_pos_err    <= '1';
+                        end if;
+                        if (r_tx_byte_cnt = 0 and r_tx_bit_cnt = 0 and s_sop = '0') then
+                            r_tx_sob_pos_err    <= '1';
+                        end if;
+
                     end if;
                 end if;
 
@@ -186,6 +222,11 @@ begin
     m_sop       <= r_rx_sr_sop(0);
     m_eop       <= r_rx_sr_eop(0); 
     s_ready     <= (not r_tx_sr_val(7)) and (not w_tx_fifo_afull);
+
+    err_stat(0) <= r_rx_fifo_full;
+    err_stat(1) <= r_tx_sob_pos_err;
+    err_stat(2) <= r_tx_eob_pos_err;
+    err_stat(5 downto 3)    <= (others => '0');
 
     uart_trx_inst   : uart_trx
         generic map(
@@ -215,7 +256,7 @@ begin
         i_rstn          => i_rstn,
         i_write_en      => w_rx_fifo_wren,
         i_write_data    => w_rx_fifo_data,
-        o_full          => open,        -- TODO: make full as a top level error signal since there is no stall propagation
+        o_full          => w_rx_fifo_full,
         o_afull         => open,
         i_read_en       => w_rx_fifo_rden,
         o_read_data     => w_rx_fifo_q,

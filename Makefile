@@ -1,6 +1,11 @@
 GHDL	:= ghdl
 GTKWAVE	:= gtkwave
 
+BOARD=tangnano9k
+FAMILY=GW1N-9C
+DEVICE=GW1NR-LV9QN88PC6/I5
+
+STD			:= 08
 SIM_TIME	?= 30us
 IDLE_CLKS	?= 50000		# longest matrix 1200 long, takes 40X188=11520 clk cycles to steadily write, with ~3clk delay we need X4 clocks to be idle (46080)
 
@@ -15,8 +20,12 @@ SRC_DIR		:= src/rtl
 TB_DIR		:= tb
 LOG_DIR		:= $(TB_DIR)/sim_logs
 
+TOP			:= top
+TOP_RTL		:= $(SRC_DIR)/top.vhd
 TOP_TB 		:= tb_hf_mod_interleaver
 TOP_TB_BRIDGE	:= tb_uart_avlnst_bridge
+
+SDC			:= src/sdc/tangnano9k.cst
 
 RTL_CORE	:= $(SRC_DIR)/core/hf_mod_interleaver.vhd
 RTL_BRIDGE	:= $(SRC_DIR)/uart/uart_trx.vhd \
@@ -32,7 +41,7 @@ WAVE_CFG	:= $(TB_DIR)/wave_config.gtkw
 
 .PHONY: all regression sim wave sim_bridge wave_bridge clean
 
-all : regression
+all : $(TOP).fs
 
 regression:
 		@for br in 150 300 600 1200; do \
@@ -63,14 +72,27 @@ wave:
 
 sim_bridge: $(RTL_BRIDGE) $(TB_BRIDGE)
 	mkdir -p $(WORK_DIR)
-	$(GHDL) -a --workdir=$(WORK_DIR) $(RTL_BRIDGE) $(TB_BRIDGE)
-	$(GHDL) -e --workdir=$(WORK_DIR) $(TOP_TB_BRIDGE)
-	$(GHDL) -r --workdir=$(WORK_DIR) $(TOP_TB_BRIDGE) --wave=$(LOG_DIR)/bridge.ghw
+	$(GHDL) -a --std=08 --workdir=$(WORK_DIR) $(RTL_BRIDGE) $(TB_BRIDGE)
+	$(GHDL) -e --std=08 --workdir=$(WORK_DIR) $(TOP_TB_BRIDGE)
+	$(GHDL) -r --std=08 --workdir=$(WORK_DIR) $(TOP_TB_BRIDGE) --wave=$(LOG_DIR)/bridge.ghw
 
 wave_bridge: $(LOG_DIR)/bridge.ghw
 	$(GTKWAVE) $< $(TB_DIR)/bridge_config.gtkw
 
+$(TOP).json: $(RTL_CORE) $(RTL_BRIDGE) $(TOP_RTL)
+	yosys -m ghdl -p "ghdl --std=$(STD) $^ -e $(TOP); synth_gowin -top $(TOP) -json $@"
+
+$(TOP)_pnr.json: $(TOP).json $(SDC)
+	nextpnr-himbaechel --json $< --freq 27 --write $@ --device $(DEVICE) --vopt family=$(FAMILY) --vopt cst=$(SDC)
+
+$(TOP).fs: $(TOP)_pnr.json
+	/mnt/work/projects/.tangnano9k/bin/gowin_pack -d $(FAMILY) -o $@ $<
+
+load: $(TOP).fs
+	openFPGALoader -b $(BOARD) $<
+
 clean:
 		rm -rf $(WORK_DIR) $(LOG_DIR)/*
 
-
+.PHONY: all regression sim wave sim_bridge wave_bridge load clean
+.INTERMEDIATE: $(TOP).json $(TOP)_pnr.json

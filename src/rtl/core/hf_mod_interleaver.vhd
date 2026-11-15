@@ -100,8 +100,8 @@ architecture arc_interleaver of hf_mod_interleaver is
     signal r_read_col_last_row0: unsigned(8 downto 0) := to_unsigned(0, 9);
     -- signal r_sr_rf_count    : std_logic_vector(23 downto 00);   -- read frame counter
     signal r_read_pnter_s0  : unsigned(1 downto 0)    := to_unsigned(0, 2);
-    signal r_sr_18_count    : std_logic_vector(17 downto 00)  := (others => '0');
-    signal r_sr_16_count    : std_logic_vector(15 downto 00)  := (others => '0');
+    signal r_sr_18_count    : std_logic_vector(17 downto 00)  := (0 => '1', others => '0');
+    signal r_sr_16_count    : std_logic_vector(15 downto 00)  := (0 => '1', others => '0');
 
     -- Stage 1
     signal r_read_valid_s1  : std_logic             := '0';
@@ -132,10 +132,10 @@ architecture arc_interleaver of hf_mod_interleaver is
     signal r_read_pnter_s4  : unsigned(1 downto 0)  := to_unsigned(0, 2);
 
     -- read mem signals
-    signal r_raddr_mem1     : unsigned(13 downto 00)  := to_unsigned(0, 14);
-    signal r_raddr_mem2     : unsigned(13 downto 00)  := to_unsigned(0, 14);
-    signal w_rdata_mem1     : std_logic;
-    signal w_rdata_mem2     : std_logic;
+    --signal r_raddr_mem1     : unsigned(13 downto 00)  := to_unsigned(0, 14);
+    --signal r_raddr_mem2     : unsigned(13 downto 00)  := to_unsigned(0, 14);
+    signal r_rdata_mem1     : std_logic;
+    signal r_rdata_mem2     : std_logic;
 
     signal w_last_18_col    : std_logic;
     signal w_last_36_col    : std_logic;
@@ -209,7 +209,7 @@ begin
 
             r_m_read_data       <= '0';
             r_m_read_valid      <= '0';
-            r_m_read_data       <= '0';
+            --r_m_read_data       <= '0';
             r_m_read_sop        <= '0';
             r_m_read_eop        <= '0';
             r_read_pnter_s4     <= (others => '0');
@@ -428,9 +428,9 @@ begin
                 r_m_read_eop    <= r_read_eop_s3;
                 r_read_pnter_s4 <= r_read_pnter_s3;
                 if (r_read_pnter_s3(0) = '0') then
-                    r_m_read_data   <= w_rdata_mem1;
+                    r_m_read_data   <= r_rdata_mem1;
                 elsif (r_read_pnter_s3(0) = '1') then
-                    r_m_read_data   <= w_rdata_mem2;
+                    r_m_read_data   <= r_rdata_mem2;
                 end if;
             end if;
         end if;
@@ -449,14 +449,14 @@ begin
             end if;
             -- read
             if m_ready = '1' then
-                r_raddr_mem1    <= r_read_addr_s2;
-                r_raddr_mem2    <= r_read_addr_s2;
+                --r_raddr_mem1    <= r_read_addr_s2;
+                --r_raddr_mem2    <= r_read_addr_s2;
+                r_rdata_mem1    <= r_mem_1(to_integer(r_read_addr_s2));
+                r_rdata_mem2    <= r_mem_2(to_integer(r_read_addr_s2));
             end if;
         end if;
     end process;
 
-    w_rdata_mem1    <= r_mem_1(to_integer(r_raddr_mem1));
-    w_rdata_mem2    <= r_mem_2(to_integer(r_raddr_mem2));
 
 
 

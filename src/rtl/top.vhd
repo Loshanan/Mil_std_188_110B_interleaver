@@ -17,8 +17,9 @@ entity top is
         i_rstn  : in std_logic;
 
         i_uart_rx   : in  std_logic;
-        o_uart_tx   : out std_logic   := '1'
+        o_uart_tx   : out std_logic   := '1';
 
+        err_stat    : out std_logic_vector(5 downto 0)
     );
 end top;
 
@@ -55,10 +56,11 @@ architecture arc_top of top is
             s_valid     : in  std_logic;
             s_data      : in  std_logic;
             s_sop       : in  std_logic;
-            s_eop       : in  std_logic
+            s_eop       : in  std_logic;
     
+            err_stat    : out std_logic_vector(5 downto 0)
         );
-    end uart_avlnst_bridge;
+    end component;
 
     component hf_mod_interleaver is
         port (
@@ -81,7 +83,7 @@ architecture arc_top of top is
             i_config    : std_logic_vector(2 downto 0)  -- [1:0] = bit rate(0: 150, 1: 300, 2: 600, 3: 1200)
                                                         -- [2]   = interleaver mode (0: short, 1: long)
         );
-    end hf_mod_interleaver;
+    end component;
 
     -- component IO
     -- Input to the interleaver
@@ -98,12 +100,16 @@ architecture arc_top of top is
     signal w_rx_sop     : std_logic;
     signal w_rx_eop     : std_logic;
 
+    signal w_err_stat   : std_logic_vector(5 downto 0);
+
 begin
+
+    err_stat  <= not w_err_stat;        -- connecting to the leds
 
     uart_avlnst_bridge_inst : uart_avlnst_bridge
     generic map(
         g_BIT_PERIOD    => g_BIT_PERIOD
-    );
+    )
     port map(
         i_clk       => i_clk,
         i_rstn      => i_rstn,
@@ -119,7 +125,8 @@ begin
         s_valid     => w_rx_valid,
         s_data      => w_rx_data,
         s_sop       => w_rx_sop,
-        s_eop       => w_rx_eop
+        s_eop       => w_rx_eop,
+        err_stat    => w_err_stat
     );
 
     hf_mod_interleaver_inst : hf_mod_interleaver
@@ -127,16 +134,16 @@ begin
         i_clk       => i_clk,
         i_rstn      => i_rstn,
         i_soft_rst  => '0',
-        s_ready     => w_rx_ready,
-        s_valid     => w_rx_valid,
-        s_data      => w_rx_data,
-        s_sop       => w_rx_sop,
-        s_eop       => w_rx_eop,
-        m_ready     => w_tx_ready,
-        m_valid     => w_tx_valid,
-        m_data      => w_tx_data,
-        m_sop       => w_tx_sop,
-        m_eop       => w_tx_eop,
-        i_config    => g_INTL_CONFIG
+        s_ready     => w_tx_ready,
+        s_valid     => w_tx_valid,
+        s_data      => w_tx_data,
+        s_sop       => w_tx_sop,
+        s_eop       => w_tx_eop,
+        m_ready     => w_rx_ready,
+        m_valid     => w_rx_valid,
+        m_data      => w_rx_data,
+        m_sop       => w_rx_sop,
+        m_eop       => w_rx_eop,
+        i_config    => "000"
     );
 end architecture;
