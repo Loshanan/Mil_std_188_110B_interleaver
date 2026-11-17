@@ -3,3 +3,4 @@ tb/sim_logs/*
 tb/board_logs/* 
 tb/gen_stim/__pycache__
 top.fs
+test/__pycache__

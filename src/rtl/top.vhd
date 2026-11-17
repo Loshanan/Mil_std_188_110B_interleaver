@@ -1,7 +1,7 @@
 -- Description  : Top module for board setup of interleaver module in Tang nano 9K fpga
 -- Author       : Mahalingam Loshanan
 -- Started      : 2026-11-01
--- Last edited  : 2026-11-01
+-- Last edited  : 2026-11-16
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -9,7 +9,7 @@ use ieee.numeric_std.all;
 
 entity top is 
     generic (
-        g_BIT_PERIOD    : natural                       := 234;     -- bit period in clk cycles: 27MHz clk, 115200 baud rate
+        g_BIT_PERIOD    : natural                       := 234;     -- bit period in clk cycles: 27MHz clk, 115200 baud rate (9600: 2812, 115200: 234)
         g_INTL_CONFIG   : std_logic_vector(2 downto 0)  := "000"    -- TODO: make it configurable in run
     );
     port (

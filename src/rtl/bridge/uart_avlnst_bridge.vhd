@@ -44,7 +44,8 @@ architecture arc_uart_avlnst_bridge of uart_avlnst_bridge is
     constant c_AE_LEVEL     : natural := 2;
     constant c_AF_LEVEL     : natural := 6;
     -- total bye count
-    constant c_BYTE_CNT     : natural := 90; -- 90 for 150bps short intl setting
+    constant c_IN_BYTE_CNT  : natural := 30; -- 30 bytes for 150bps short intl setting as input frame length
+    constant c_OUT_BYTE_CNT : natural := 90; -- 90 for 150bps short intl setting
 
     -------------------------------------------------
     -- mem type
@@ -81,6 +82,12 @@ architecture arc_uart_avlnst_bridge of uart_avlnst_bridge is
     signal w_rx_fifo_full   : std_logic;
     signal r_tx_sob_pos_err : std_logic := '0';
     signal r_tx_eob_pos_err : std_logic := '0';
+
+    constant R_TX_BIT_BIT_POS : natural   := 362;
+    signal r_tx_dbg_bit     : std_logic := '0';
+    signal r_tx_dbg_byte_pos: natural   := R_TX_BIT_BIT_POS/8;
+    signal r_tx_dbg_bit_pos : natural   := R_TX_BIT_BIT_POS mod 8;
+
 
     -------------------------------------------------
     -- component declaration 
@@ -142,6 +149,7 @@ begin
                 r_rx_fifo_full  <= '0';
                 r_tx_sob_pos_err    <= '0';
                 r_tx_eob_pos_err    <= '0';
+                r_tx_dbg_bit    <= '0';
 
                 r_tx_byte_cnt   <= (others => '0');
                 r_tx_bit_cnt    <= (others => '0');
@@ -157,7 +165,7 @@ begin
                     r_rx_fifo_q     <= w_rx_fifo_q;
                     r_rx_sr_val     <= (others => '1');
                     -- count bytes
-                    if (r_rx_byte_cnt = c_BYTE_CNT-1) then 
+                    if (r_rx_byte_cnt = c_IN_BYTE_CNT-1) then 
                         r_rx_byte_cnt   <= (others => '0');
                     else
                         r_rx_byte_cnt   <= r_rx_byte_cnt + 1;
@@ -169,7 +177,7 @@ begin
                         r_rx_sr_sop     <= (others => '0');
                     end if;
                     -- eop array
-                    if (r_rx_byte_cnt = c_BYTE_CNT-1) then
+                    if (r_rx_byte_cnt = c_IN_BYTE_CNT-1) then
                         r_rx_sr_eop     <= (7 => '1', others => '0');
                     else
                         r_rx_sr_eop     <= (others => '0');
@@ -186,7 +194,7 @@ begin
                 -- from avalon stream to uart
                 if (r_tx_sr_val(7) = '1') then
                     r_tx_sr_val     <= (others => '0');
-                    if (r_tx_byte_cnt = c_BYTE_CNT-1) then 
+                    if (r_tx_byte_cnt = c_OUT_BYTE_CNT-1) then 
                         r_tx_byte_cnt   <= (others => '0');
                     else
                         r_tx_byte_cnt   <= r_tx_byte_cnt + 1;
@@ -196,11 +204,14 @@ begin
                         r_tx_sr_data    <= s_data & r_tx_sr_data(7 downto 1);
                         r_tx_sr_val     <= r_tx_sr_val(6 downto 0) & '1';
                         r_tx_bit_cnt    <= r_tx_bit_cnt + 1;
-                        if (r_tx_byte_cnt = c_BYTE_CNT-1 and r_tx_bit_cnt = 7 and s_eop = '0') then
+                        if (r_tx_byte_cnt = c_OUT_BYTE_CNT-1 and r_tx_bit_cnt = 7 and s_eop = '0') then
                             r_tx_eob_pos_err    <= '1';
                         end if;
                         if (r_tx_byte_cnt = 0 and r_tx_bit_cnt = 0 and s_sop = '0') then
                             r_tx_sob_pos_err    <= '1';
+                        end if;
+                        if ((r_tx_byte_cnt = r_tx_dbg_byte_pos) and (r_tx_bit_cnt = r_tx_dbg_bit_pos)) then
+                            r_tx_dbg_bit    <= s_data;
                         end if;
 
                     end if;
@@ -226,7 +237,8 @@ begin
     err_stat(0) <= r_rx_fifo_full;
     err_stat(1) <= r_tx_sob_pos_err;
     err_stat(2) <= r_tx_eob_pos_err;
-    err_stat(5 downto 3)    <= (others => '0');
+    err_stat(4 downto 3)    <= (others => '0');
+    err_stat(5) <= r_tx_dbg_bit;
 
     uart_trx_inst   : uart_trx
         generic map(

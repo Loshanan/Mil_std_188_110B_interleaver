@@ -201,6 +201,9 @@ Started project on 03/Sep/2026
 11/Nov/2026 - created python test; Not enough resources in board to run full setup :-((   (~1.5 hour)
 12/Nov/2026 - ran test on board, output length is 1/3 of input; need debug (see first board simulation results for last days bug) (~1.5 hour)
 13/Nov/2026 - trying to debug design in board; everytime it runs it gives different values; (Interleaver was in half filled state-> so each run different results; reset before every run) (spent around 2 hours to find this reset thing)
+14/Nov/2026 - Saturday worked on full day found sob mismatch while giving, now only 6 bit mismatching in board run; need debug
+16/Nov/2026 - bit flip happens in interleaver (~ 1.5 hour)
+17/Nov/2026 - debug in few bits board run (~1.5 hour)
 -->
 
 <!--

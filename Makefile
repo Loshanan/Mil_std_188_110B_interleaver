@@ -24,6 +24,7 @@ TOP			:= top
 TOP_RTL		:= $(SRC_DIR)/top.vhd
 TOP_TB 		:= tb_hf_mod_interleaver
 TOP_TB_BRIDGE	:= tb_uart_avlnst_bridge
+TOP_TB_BOARD 	:= tb_top
 
 SDC			:= src/sdc/tangnano9k.cst
 
@@ -35,6 +36,8 @@ RTL_BRIDGE	:= $(SRC_DIR)/uart/uart_trx.vhd \
 TB			:= $(TB_DIR)/tb_avalon_st_driver_pkg.vhd \
 			 	$(TB_DIR)/tb_hf_mod_interleaver.vhd
 TB_BRIDGE	:= $(TB_DIR)/tb_uart_avlnst_bridge.vhd
+TB_BOARD	:= $(TB_DIR)/tb_top.vhd
+
 
 WAVE		:= $(LOG_DIR)/wave.ghw
 WAVE_CFG	:= $(TB_DIR)/wave_config.gtkw
@@ -79,6 +82,15 @@ sim_bridge: $(RTL_BRIDGE) $(TB_BRIDGE)
 wave_bridge: $(LOG_DIR)/bridge.ghw
 	$(GTKWAVE) $< $(TB_DIR)/bridge_config.gtkw
 
+sim_top: $(RTL_BRIDGE) $(TB_BOARD)
+	mkdir -p $(WORK_DIR)
+	$(GHDL) -a --std=08 --workdir=$(WORK_DIR) $(RTL_CORE) $(RTL_BRIDGE) $(TOP_RTL) $(TB_BOARD)
+	$(GHDL) -e --std=08 --workdir=$(WORK_DIR) $(TOP_TB_BOARD)
+	$(GHDL) -r --std=08 --workdir=$(WORK_DIR) $(TOP_TB_BOARD) --wave=$(LOG_DIR)/top.ghw --stop-time=200ms
+
+wave_top: $(LOG_DIR)/top.ghw
+	$(GTKWAVE) $< $(TB_DIR)/wave_top.gtkw
+	
 $(TOP).json: $(RTL_CORE) $(RTL_BRIDGE) $(TOP_RTL)
 	yosys -m ghdl -p "ghdl --std=$(STD) $^ -e $(TOP); synth_gowin -top $(TOP) -json $@"
 
@@ -92,7 +104,7 @@ load: $(TOP).fs
 	openFPGALoader -b $(BOARD) $<
 
 clean:
-		rm -rf $(WORK_DIR) $(LOG_DIR)/*
+		rm -rf $(WORK_DIR) $(LOG_DIR)/* ./test/__pycache__
 
 .PHONY: all regression sim wave sim_bridge wave_bridge load clean
 .INTERMEDIATE: $(TOP).json $(TOP)_pnr.json
